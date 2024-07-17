@@ -1,0 +1,16 @@
+# Opus codec reference implementation pkg-config file
+
+prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+exec_prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+libdir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/lib
+includedir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/include
+
+Name: Opus
+Description: Opus IETF audio codec ( build)
+URL: https://opus-codec.org/
+Version: 1.5.2
+Requires:
+Conflicts:
+Libs: -L/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/lib -lopus
+Libs.private: -lm
+Cflags: -I/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/include/opus

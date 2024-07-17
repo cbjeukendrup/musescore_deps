@@ -1,0 +1,14 @@
+# libvorbisfile pkg-config source file
+
+prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+exec_prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/bin
+libdir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/lib
+includedir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/include
+
+Name: vorbisfile
+Description: vorbisfile is a library that provides a convenient high-level API for decoding and basic manipulation of all Vorbis I audio streams
+Version: 1.3.7
+Requires.private: vorbis
+Conflicts:
+Libs: -L${libdir} -lvorbisfile
+Cflags: -I${includedir}
