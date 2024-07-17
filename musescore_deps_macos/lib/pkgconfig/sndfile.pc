@@ -1,0 +1,13 @@
+prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+exec_prefix=${prefix}
+libdir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/lib
+includedir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/include
+
+Name: sndfile
+Description: A library for reading and writing audio files
+Requires:
+Requires.private: flac ogg vorbis vorbisenc opus 
+Version: 1.2.2
+Libs: -L${libdir} -lsndfile
+Libs.private: 
+Cflags: -I${includedir}
