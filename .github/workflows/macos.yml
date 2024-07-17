@@ -156,10 +156,17 @@ jobs:
       # Create pull request
       #########################################################################
 
+      - name: Compress
+        run: |
+          cd musescore_deps_macos
+          tar czf ../musescore_deps_macos.tar.gz *
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: "Add macOS dependencies"
           title: "Add macOS dependencies"
           branch: macos
-          add-paths: "musescore_deps_macos"
+          add-paths: |
+            musescore_deps_macos
+            musescore_deps_macos.tar.gz
