@@ -1,0 +1,11 @@
+prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+exec_prefix=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos
+libdir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/lib
+includedir=/Users/runner/work/musescore_deps/musescore_deps/musescore_deps_macos/include
+
+Name: FLAC++
+Description: Free Lossless Audio Codec Library (C++ API)
+Version: 1.4.3
+Requires: flac
+Libs: -L${libdir} -lFLAC++
+Cflags: -I${includedir}
