@@ -1,0 +1,57 @@
+name: Build Google Crashpad
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-22.04, ubuntu-24.04-arm]
+    steps:
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            brew install ninja cmake python3
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            choco install ninja cmake python3
+          else
+            sudo apt-get update
+            sudo apt-get install -y ninja-build cmake python3 build-essential zlib1g-dev libcurl4-openssl-dev
+          fi
+
+      - name: Install depot_tools
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $HOME/depot_tools
+          echo "$HOME/depot_tools" >> $GITHUB_PATH
+      - name: Install depot_tools
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git C:\depot_tools
+          echo C:\depot_tools>>%GITHUB_PATH%
+          C:\depot_tools\gclient
+      - name: Fetch Crashpad
+        shell: bash
+        run: |
+          mkdir -p ~/crashpad
+          cd ~/crashpad
+          fetch crashpad
+
+      - name: Build Crashpad
+        shell: bash
+        run: |
+          cd ~/crashpad/crashpad
+          gn gen out/Default
+          ninja -C out/Default
+
+      - name: Archive artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashpad-${{ runner.os }}-${{ runner.arch }}
+          path: ~/crashpad/crashpad/out/Default
