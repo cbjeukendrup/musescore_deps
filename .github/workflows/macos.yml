@@ -11,6 +11,7 @@ env:
   VORBIS_VERSION: 1.3.7
   OPUS_VERSION: 1.5.2
   LIBSNDFILE_VERSION: 1.2.2
+  LIBINSTPATCH_VERSION: 1.1.7
 
 jobs:
   build:
@@ -194,6 +195,35 @@ jobs:
             mv "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib.new" \
                "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib"
           done
+
+      #########################################################################
+      # libInstPatch
+      #########################################################################
+
+      - name: libinstpatch - Download source code
+        run: |
+          mkdir -p build
+          wget -q --show-progress -O build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz https://github.com/swami/libinstpatch/archive/refs/tags/v${LIBINSTPATCH_VERSION}.tar.gz
+          tar xf build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz -C build
+          rm build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz
+
+      - name: libinstpatch - Build
+        run: |
+          cd build/libinstpatch-${LIBINSTPATCH_VERSION}
+          export PKG_CONFIG_PATH=/Users/runner/work/musescore_deps/x86-homebrew/lib/pkgconfig:/usr/lib/pkgconfig
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_PROGRAMS=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_TESTING=OFF \
+            -DBUILD_REGTEST=OFF \
+            -DINSTALL_MANPAGES=OFF
+          cmake --build build
+          cmake --install build
 
       #########################################################################
       # Create pull request
