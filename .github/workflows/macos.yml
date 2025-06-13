@@ -143,8 +143,8 @@ jobs:
           cd build/libsndfile-${LIBSNDFILE_VERSION}
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_PROGRAMS=OFF \
