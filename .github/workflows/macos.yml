@@ -43,8 +43,8 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DINSTALL_DOCS=OFF \
@@ -68,8 +68,8 @@ jobs:
           cd build/flac-${FLAC_VERSION}
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_PROGRAMS=OFF \
@@ -97,8 +97,8 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DCMAKE_MACOSX_RPATH=ON # Nowadays default, but vorbis uses old minimum CMake version
@@ -121,8 +121,8 @@ jobs:
           cd build/opus-${OPUS_VERSION}
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON
           cmake --build build
@@ -145,8 +145,8 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_PROGRAMS=OFF \
@@ -163,8 +163,10 @@ jobs:
 
       - name: Compress
         run: |
-          cd musescore_deps_macos
+          cd ../../../musescore_deps_macos
           tar czf ../musescore_deps_macos.tar.gz *
+          mv ../musescore_deps_macos.tar.gz ../work/musescore_deps/musescore_deps/
+          mv ../musescore_deps_macos ../work/musescore_deps/musescore_deps/
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
