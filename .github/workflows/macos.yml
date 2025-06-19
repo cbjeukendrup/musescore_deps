@@ -11,6 +11,7 @@ env:
   VORBIS_VERSION: 1.3.7
   OPUS_VERSION: 1.5.2
   LIBSNDFILE_VERSION: 1.2.2
+  LIBINSTPATCH_VERSION: 1.1.7
 
 jobs:
   build:
@@ -41,9 +42,10 @@ jobs:
         run: |
           cd build/libogg-${OGG_VERSION}
           cmake -B build -G Ninja \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DINSTALL_DOCS=OFF \
@@ -67,8 +69,8 @@ jobs:
           cd build/flac-${FLAC_VERSION}
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_PROGRAMS=OFF \
@@ -94,9 +96,10 @@ jobs:
         run: |
           cd build/libvorbis-${VORBIS_VERSION}
           cmake -B build -G Ninja \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DCMAKE_MACOSX_RPATH=ON # Nowadays default, but vorbis uses old minimum CMake version
@@ -119,8 +122,8 @@ jobs:
           cd build/opus-${OPUS_VERSION}
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON
           cmake --build build
@@ -141,9 +144,77 @@ jobs:
         run: |
           cd build/libsndfile-${LIBSNDFILE_VERSION}
           cmake -B build -G Ninja \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=../../musescore_deps_macos \
-            -DCMAKE_INSTALL_PREFIX=../../musescore_deps_macos \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_PROGRAMS=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_TESTING=OFF \
+            -DBUILD_REGTEST=OFF \
+            -DINSTALL_MANPAGES=OFF
+          cmake --build build
+          cmake --install build
+
+      #########################################################################
+      # glib
+      # - requirement of libInstPatch
+      #########################################################################
+
+      - name: glib - Download x86_64 binaries
+        run: |
+          cd ..
+          mkdir x86-homebrew
+          curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C x86-homebrew
+          shopt -s expand_aliases
+          alias x86-brew="$(pwd)/x86-homebrew/bin/brew"
+          response="$(x86-brew fetch --force --bottle-tag=sonoma glib | grep 'Downloaded to')"
+          x86-brew install "${response##*Downloaded to: }"
+
+      - name: glib - Download arm64 binaries
+        run: |
+          cd ..
+          mkdir arm-homebrew
+          curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C arm-homebrew
+          shopt -s expand_aliases
+          alias arm-brew="$(pwd)/arm-homebrew/bin/brew"
+          response="$(arm-brew fetch --force --bottle-tag=arm64_sonoma glib | grep 'Downloaded to')"
+          arm-brew install "${response##*Downloaded to: }"
+
+      - name: glib - Create x86_64 + arm64 combined libraries
+        run: |
+          shopt -s expand_aliases
+          alias x86-brew="$(pwd)/../x86-homebrew/bin/brew"
+          alias arm-brew="$(pwd)/../arm-homebrew/bin/brew"
+          for lib in glib gobject gthread; do
+            lipo -create "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib" \
+                         "$(arm-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib" \
+                 -output "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib.new"
+            mv "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib.new" \
+               "$(x86-brew --prefix glib)/lib/lib${lib}-2.0.0.dylib"
+          done
+
+      #########################################################################
+      # libInstPatch
+      #########################################################################
+
+      - name: libinstpatch - Download source code
+        run: |
+          mkdir -p build
+          wget -q --show-progress -O build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz https://github.com/swami/libinstpatch/archive/refs/tags/v${LIBINSTPATCH_VERSION}.tar.gz
+          tar xf build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz -C build
+          rm build/libinstpatch-${LIBINSTPATCH_VERSION}.tar.gz
+
+      - name: libinstpatch - Build
+        run: |
+          cd build/libinstpatch-${LIBINSTPATCH_VERSION}
+          export PKG_CONFIG_PATH=/Users/runner/work/musescore_deps/x86-homebrew/lib/pkgconfig:/usr/lib/pkgconfig
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH=../../../../../musescore_deps_macos \
+            -DCMAKE_INSTALL_PREFIX=../../../../../musescore_deps_macos \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_PROGRAMS=OFF \
@@ -160,8 +231,10 @@ jobs:
 
       - name: Compress
         run: |
-          cd musescore_deps_macos
+          cd ../../../musescore_deps_macos
           tar czf ../musescore_deps_macos.tar.gz *
+          mv ../musescore_deps_macos.tar.gz ../work/musescore_deps/musescore_deps/
+          mv ../musescore_deps_macos ../work/musescore_deps/musescore_deps/
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
